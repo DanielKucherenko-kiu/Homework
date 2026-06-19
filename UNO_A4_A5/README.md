@@ -18,12 +18,6 @@ It includes:
 - Maven 3.9+
 - Docker, only if running the Docker version
 
-PyCharm setup:
-
-1. Open this folder as a project.
-2. Let PyCharm import the Maven `pom.xml`.
-3. Use the Maven tool window to run `test`, `package`, or `exec:java`.
-4. The main class is `com.example.uno.cli.Main`.
 
 ## Local build
 
