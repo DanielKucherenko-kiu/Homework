@@ -1,0 +1,72 @@
+# Assignment 3 Test Report
+
+## Test framework
+
+I used JUnit 5 for the unit tests. All tests are for the refactored Columns game under `Java2026/src/columns`. I did not test or modify `columns/original`.
+
+## Model behavior tested
+
+The model tests cover the most important game-rule behavior:
+
+- `Figure` creation with deterministic colors
+- figure movement left, right, and down
+- figure rotation up and down
+- board initialization
+- pasting a figure into the board field
+- dropping a figure to the lowest valid position
+- movement boundaries at the left wall, right wall, and bottom
+- blocked movement when neighboring cells are occupied
+- vertical, horizontal, and diagonal match detection
+- no false match when only two same-colored cells touch
+- field collapse/packing after cells disappear
+- score updates from matches and drop score
+- level changes after the configured match threshold
+- maximum-level boundary
+- game-over detection when row 3 contains a block
+
+The assertions check behavior such as changed positions, changed color order, updated board cells, score changes, listener notifications, and game-over state.
+
+## Controller/event behavior tested
+
+The controller tests cover the required event behavior:
+
+- left movement event
+- right movement event
+- rotate up event
+- rotate down event
+- drop event
+- level up event
+- level down event
+
+The tests verify the outcome of each event, such as the current figure changing position, colors rotating, the figure dropping to the bottom, timer reset after drop, level changes, and match-counter reset after manual level changes.
+
+## Test doubles used
+
+I used small hand-written test doubles:
+
+- `FakeRandomGenerator` returns a fixed sequence of integers so figure colors are predictable.
+- `RecordingModelListener` records level, score, field, and triplet callbacks from the board.
+- `FakeScreen` records drawing calls without using real AWT graphics.
+- `FakePlatform` avoids real time, real sleeping, real keyboard input, and real screen drawing.
+
+These test doubles make the tests deterministic, fast, and independent from the applet boundary.
+
+## What was hard to test
+
+The model was easier to test than the controller because `Board` and `Figure` expose direct game state. The controller was harder because it combines event handling, drawing, timing, and the game loop.
+
+I did not test the full `runGameLoop` because it is long-running and depends on timing, random figure creation, repeated event polling, match detection, collapse, rendering, and game-over checks. Testing the full loop directly would be more brittle than focused event tests.
+
+I also did not test pause behavior because it loops while waiting for a key press. Without a special fake platform that changes key state at exactly the right moment, a pause test could hang.
+
+## Design problems revealed by the tests
+
+The tests revealed that controller logic is still coupled to rendering and timing. Focused event tests were possible because `processEvent` is package-private, but testing the whole loop would require more test seams.
+
+The board also has mutable public/package-private state, which makes setup easy but can tempt tests to check too many implementation details. I tried to keep assertions focused on game behavior: movement, matching, collapse, score, level, and game-over state.
+
+## Production-code changes made for testability
+
+No production-code changes were required. The existing package-private access in `columns.model` was enough for focused tests, and the controller already receives a `Platform` dependency that can be replaced by a fake platform in tests.
+
+No game rules were changed, no broad refactoring was done, and `columns/original` was ignored.
